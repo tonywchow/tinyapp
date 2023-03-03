@@ -31,25 +31,24 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/:id', (req, res) => {
-  let shortURLExist 
-  if (urlDatabase[req.params.id] !== undefined) {
-    shortURLExist = urlDatabase[req.params.id]
-  } else {
-    shortURLExist = `${req.params.id} does not exist in database`
-  }
-  
   const templateVars = { 
     id: req.params.id, 
-    longURL: shortURLExist
+    longURL: urlDatabase[req.params.id]
   };
   res.render('urls_show', templateVars)
 });
 
 app.post('/urls', (req, res) => {
   console.log(req.body);// Log the POST request body to the console
-  urlDatabase[generateRandomString()] = req.body.longURL
-  res.send('Ok');// Respond with 'Ok' (we will replace this)
+  let shortenURLKey = generateRandomString()
+  urlDatabase[shortenURLKey] = req.body.longURL
+  res.redirect(`/urls/${shortenURLKey}`);// Respond with 'Ok' (we will replace this)
 });
+
+app.get('/u/:id', (req, res) => {
+  longURL = urlDatabase[req.params.id]
+  res.redirect(longURL)
+})
 
 app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
