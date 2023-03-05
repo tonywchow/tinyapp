@@ -1,5 +1,5 @@
 const express = require('express');
-const morgan = require('morgan');
+const morgan = require('morgan');// Middleware logger
 const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; //default port 8080
@@ -7,6 +7,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -81,7 +82,7 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls')
 })
 /*
-This POST will retrieve forum input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'http://'. If not it will add it to the string.
+This POST will retrieve form input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'http://'. If not it will add it to the string.
 */
 app.post('/urls/:id/edit', (req, res) => {
   const id = req.params.id;
@@ -106,8 +107,8 @@ app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
-//Logging out
 
+//Logging out
 app.post('/logout', (req, res) => {
   res.clearCookie('username')
   res.redirect('/urls')
@@ -116,7 +117,7 @@ app.post('/logout', (req, res) => {
 app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
 });
-
+//Used to bind and listen to the connection on the specified host and port
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
