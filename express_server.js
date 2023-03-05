@@ -7,7 +7,9 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-
+/*
+This function will generate a random string with a length of 6
+*/
 const generateRandomString = () => {
   return Math.random().toString(36).slice(2, 8);
 };
@@ -28,16 +30,23 @@ app.get('/urls', (req, res) => {
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
 });
+
 /*
-Displays the long and short URL.
+This will determine if the short url ID exist, if it doesnt, it will redirect back to the /url page. If it does exist, it will display the Long and short URL
 */
 app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
-  res.render('urls_show', templateVars);
+  let longURL = urlDatabase[req.params.id];
+  if (longURL) {
+    res.render('urls_show', templateVars);
+    res.redirect(longURL);
+  }
+  res.redirect('/urls')
 });
+
 /*
 This post will generate a shortenURLKey and log it into the database. It will the redirect you to the URL
 */
@@ -48,29 +57,28 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${shortenURLKey}`);// Redirects you to the shortenURLKey
 });
 /*
-This will determine if the short url ID exist, if it doesnt, it will throw an error block to a new urls_error.ejs file i created specifcally made for errors.
+This POST is initiated when the delete button in urls_index.ejs is clicked
 */
-app.get('/u/:id', (req, res) => {
-  let longURL = urlDatabase[req.params.id];
-  if (longURL !== undefined) {
-    res.redirect(longURL);
-  } else {
-    res.render('urls_error', {Error: 'block'});
-  }
-});
-
 app.post('/urls/:id/delete', (req, res) => {
   delete urlDatabase[req.params.id]
   res.redirect('/urls')
 })
-
+/*
+This POST will retrieve forum input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'http://'. If not it will add it to the string.
+*/
 app.post('/urls/:id/edit', (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
-  urlDatabase[id] = longURL;
+  if (longURL.includes('http://')) {
+    urlDatabase[id] = longURL;
+  } else {
+    urlDatabase[id] = 'http://' + longURL
+  }
   res.redirect('/urls')
 })
-
+/*
+This POST is initiated from urls_index.ejs when the edit button is clicked
+*/
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
