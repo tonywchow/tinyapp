@@ -115,6 +115,13 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
+//Email and password form
+
+app.get('/register', (req, res) => {
+  res.render('urls_register')
+})
+
+
 app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
 });
