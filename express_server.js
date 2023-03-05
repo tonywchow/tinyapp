@@ -13,6 +13,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 /*
 This function will generate a random string with a length of 6
 */
@@ -118,7 +131,20 @@ app.post('/logout', (req, res) => {
 //Email and password form
 
 app.get('/register', (req, res) => {
-  res.render('urls_register')
+  const templateVars = { users };
+  res.render('urls_register', templateVars)
+});
+
+app.post('/register', (req, res) => {
+  const newUserID = generateRandomString();
+  users[newUserID] = {
+    id: newUserID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie('username', users[newUserID].id)
+  console.log(users)
+  res.redirect('/urls')
 })
 
 
