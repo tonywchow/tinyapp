@@ -5,6 +5,7 @@ const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+app.use(cookieParser());
 app.set('view engine', 'ejs');
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -31,7 +32,8 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const templateVars = { 
-    urls: urlDatabase
+    urls: urlDatabase,
+    username: req.cookies['username']
   };
   res.render('urls_index', templateVars);
 });
@@ -39,10 +41,10 @@ app.get('/urls', (req, res) => {
 //Creating new Short URL from Long URL
 
 app.get('/urls/new', (req, res) => {
-  // const templateVars = { 
-  //   username: req.cookies['username']
-  // }
-  res.render('urls_new');
+  const templateVars = { 
+    username: req.cookies['username']
+  }
+  res.render('urls_new',templateVars);
 });
 
 /*
@@ -51,7 +53,8 @@ This will determine if the short url ID exist, if it doesnt, it will redirect ba
 app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies['username']
   };
   let longURL = urlDatabase[req.params.id];
   if (longURL) {
