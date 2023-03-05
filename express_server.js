@@ -1,7 +1,11 @@
 const express = require('express');
+const morgan = require('morgan');
+const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.use(cookieParser());
 app.set('view engine', 'ejs');
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -13,6 +17,8 @@ This function will generate a random string with a length of 6
 const generateRandomString = () => {
   return Math.random().toString(36).slice(2, 8);
 };
+ 
+//Homepage
 
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -22,13 +28,23 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+//Viewing all urls
+
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies['username']
+  };
   res.render('urls_index', templateVars);
 });
 
+//Creating new Short URL from Long URL
+
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = { 
+    username: req.cookies['username']
+  }
+  res.render('urls_new',templateVars);
 });
 
 /*
@@ -37,7 +53,8 @@ This will determine if the short url ID exist, if it doesnt, it will redirect ba
 app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies['username']
   };
   let longURL = urlDatabase[req.params.id];
   if (longURL) {
@@ -83,6 +100,18 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
 });
+
+//Accepting login username
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+//Logging out
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username')
+  res.redirect('/urls')
+})
 
 app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
