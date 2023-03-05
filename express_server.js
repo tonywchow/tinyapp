@@ -1,7 +1,9 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
 app.set('view engine', 'ejs');
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -13,6 +15,8 @@ This function will generate a random string with a length of 6
 const generateRandomString = () => {
   return Math.random().toString(36).slice(2, 8);
 };
+ 
+//Homepage
 
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -22,10 +26,14 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+//Viewing all urls
+
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
+
+//Creating new Short URL from Long URL
 
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
@@ -82,6 +90,13 @@ This POST is initiated from urls_index.ejs when the edit button is clicked
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
+});
+
+
+app.post('/login', (req, res) => {
+  console.log(req.body.username)
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
 });
 
 app.get('/hello', (req, res) => {
