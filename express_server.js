@@ -101,12 +101,17 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-
+//Accepting login username
 app.post("/login", (req, res) => {
-  console.log(req.body.username)
   res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
+//Logging out
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username')
+  res.redirect('/urls')
+})
 
 app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
