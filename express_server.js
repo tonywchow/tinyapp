@@ -1,6 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
@@ -12,6 +12,7 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
 /*
 This function will generate a random string with a length of 6
 */
@@ -20,7 +21,6 @@ const generateRandomString = () => {
 };
  
 //Homepage
-
 app.get('/', (req, res) => {
   res.send('Hello!');
 });
@@ -30,9 +30,8 @@ app.get('/urls.json', (req, res) => {
 });
 
 //Viewing all urls
-
 app.get('/urls', (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
     username: req.cookies['username']
   };
@@ -40,11 +39,10 @@ app.get('/urls', (req, res) => {
 });
 
 //Creating new Short URL from Long URL
-
 app.get('/urls/new', (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     username: req.cookies['username']
-  }
+  };
   res.render('urls_new',templateVars);
 });
 
@@ -62,7 +60,7 @@ app.get('/urls/:id', (req, res) => {
     res.render('urls_show', templateVars);
     res.redirect(longURL);
   }
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 /*
@@ -74,13 +72,15 @@ app.post('/urls', (req, res) => {
   urlDatabase[shortenURLKey] = req.body.longURL;
   res.redirect(`/urls/${shortenURLKey}`);// Redirects you to the shortenURLKey
 });
+
 /*
 This POST is initiated when the delete button in urls_index.ejs is clicked
 */
 app.post('/urls/:id/delete', (req, res) => {
-  delete urlDatabase[req.params.id]
-  res.redirect('/urls')
-})
+  delete urlDatabase[req.params.id];
+  res.redirect('/urls');
+});
+
 /*
 This POST will retrieve form input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'http://'. If not it will add it to the string.
 */
@@ -90,10 +90,11 @@ app.post('/urls/:id/edit', (req, res) => {
   if (longURL.includes('http://')) {
     urlDatabase[id] = longURL;
   } else {
-    urlDatabase[id] = 'http://' + longURL
+    urlDatabase[id] = 'http://' + longURL;
   }
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
+
 /*
 This POST is initiated from urls_index.ejs when the edit button is clicked
 */
@@ -110,13 +111,14 @@ app.post("/login", (req, res) => {
 
 //Logging out
 app.post('/logout', (req, res) => {
-  res.clearCookie('username')
-  res.redirect('/urls')
-})
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
 
 app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
 });
+
 //Used to bind and listen to the connection on the specified host and port
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
