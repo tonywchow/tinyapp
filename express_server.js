@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
 const cookieParser = require('cookie-parser');
+const { generateRandomString, getUserByEmail } = require('./helper')
 const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
@@ -24,14 +25,16 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+  testid: {
+    id: "testid",
+    email: "hello@example.com",
+    password: "hello",
+  },
 };
 
 /*
 This function will generate a random string with a length of 6
 */
-const generateRandomString = () => {
-  return Math.random().toString(36).slice(2, 8);
-};
  
 //Homepage
 app.get('/', (req, res) => {
@@ -136,17 +139,31 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  const newUserID = generateRandomString();
-  users[newUserID] = {
-         
-    id: newUserID,
-    email: req.body.email,
-    password: req.body.password
-
+  let newUserID = generateRandomString();
+  if (req.body.email.length === 0) {
+    res.status(400).send('Please enter login details')
   }
-  res.cookie('user_id', newUserID)
+  if (req.body.password.length === 0) {
+    res.status(400).send('Invalid Password')
+  }
+  if (getUserByEmail(req.body.email, users) === undefined) {
+    users[newUserID] = {
+           
+      id: newUserID,
+      email: req.body.email,
+      password: req.body.password
+  
+    }
+    res.cookie('user_id', newUserID);
+  } else {
+    res.status(400).send('Email already exist')
+  };
   console.log(users)
-  console.log(req.cookies['user_id'])
+  
+  
+  
+  // console.log(users)
+  // console.log(req.cookies['user_id'])
   res.redirect('/urls')
 })
 
