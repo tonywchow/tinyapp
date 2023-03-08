@@ -22,8 +22,13 @@
           <h5 style="margin: 0.5em;">Logged in as: <%= user.email %></h5>
           <button type="submit" class="btn btn-primary">Log Out</button>
         </form>
-      <% } else{ %>  
-        <form class="d-flex ml-auto p-2" action="/login"  method="POST">
+      <% } else{ %>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-item nav-link" href="/register">Register</a>
+            <a class="nav-item nav-link" href="/login">Login</a>  
+          </div>
+        <!-- <form class="d-flex ml-auto p-2" action="/login"  method="POST">
           <input
             type="text"
             name="user_id"
@@ -31,7 +36,7 @@
             style="width: 150px; margin: 1em;"
           />
           <button type="submit" class="btn btn-primary">Sign In</button>
-        </form>
+        </form> -->
      <% } %>
     </div>
   </nav>
