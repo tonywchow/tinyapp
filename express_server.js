@@ -1,7 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
 const cookieParser = require('cookie-parser');
-const { generateRandomString, getUserByEmail } = require('./helper')
+const { generateRandomString, getUserByEmail } = require('./helper');
+const { urlencoded } = require('express');
 const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
@@ -27,7 +28,7 @@ const users = {
   },
   testid: {
     id: "testid",
-    email: "hello@example.com",
+    email: "hello@gmail.com",
     password: "hello",
   },
 };
@@ -119,53 +120,68 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-//Accepting login username
+//Login page
+app.get('/login', (req, res) => {
+  const templateVars = {user: null};
+  
+  res.render('urls_login', templateVars);
+});
+
 app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.user_id);//loop through array to find user
+  if (req.body.email.length === 0) {
+    return res.status(400).send('Please enter login details');
+  }
+  if (req.body.password.length === 0) {
+    return res.status(400).send('Invalid Password');
+  }
+  const userUniqueID = getUserByEmail(req.body.email, users)
+  if (userUniqueID === undefined) {
+    return res.status(403).send('Email does not exist')
+  }
+  if (userUniqueID) {
+    if (userUniqueID.password !== req.body.password) {
+      return res.status(403).send('Incorrect password')
+    }
+  }
+  console.log(users.userUniqueID)
+  res.cookie("user_id", userUniqueID.id);
   res.redirect("/urls");
 });
+
 
 //Logging out
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
-//Email and password form
-
+//Registering new email
 app.get('/register', (req, res) => {
   const templateVars = { users };
-  res.render('urls_register', templateVars)
+  res.render('urls_register', templateVars);
 });
 
 app.post('/register', (req, res) => {
   let newUserID = generateRandomString();
   if (req.body.email.length === 0) {
-    res.status(400).send('Please enter login details')
+    res.status(400).send('Please enter login details');
   }
   if (req.body.password.length === 0) {
-    res.status(400).send('Invalid Password')
+    res.status(400).send('Invalid Password');
   }
   if (getUserByEmail(req.body.email, users) === undefined) {
     users[newUserID] = {
-           
       id: newUserID,
       email: req.body.email,
-      password: req.body.password
-  
-    }
+      password: req.body.password,
+    };
     res.cookie('user_id', newUserID);
   } else {
-    res.status(400).send('Email already exist')
-  };
-  console.log(users)
-  
-  
-  
-  // console.log(users)
-  // console.log(req.cookies['user_id'])
-  res.redirect('/urls')
-})
+    res.status(400).send('Email already exist');
+  }
+  console.log(users);
+  res.redirect('/urls');
+});
 
 
 app.get('/hello', (req, res) => {
