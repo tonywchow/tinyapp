@@ -85,6 +85,9 @@ app.get('/urls/:id', (req, res) => {
 //When the user clicks the short ID, they will be taken to the longURL
 
 app.get('/u/:id', (req, res) => {
+  if (!urlDatabase[req.params.id]) {
+    res.send('Shortened URL does not exist')
+  }
   const longURL = urlDatabase[req.params.id]
   res.redirect(longURL)
 })
