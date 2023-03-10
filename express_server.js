@@ -69,7 +69,6 @@ app.get('/urls/new', (req, res) => {
 This will determine if the short url ID exist, if it doesnt, it will redirect back to the /url page. If it does exist, it will display the Long and short URL
 */
 app.get('/urls/:id', (req, res) => {
-  
   const templateVars = {
     id: req.params.id,
     longURL: AddHttp(urlDatabase[req.params.id]),
@@ -82,6 +81,14 @@ app.get('/urls/:id', (req, res) => {
   }
   res.redirect('/urls');
 });
+
+//When the user clicks the short ID, they will be taken to the longURL
+
+app.get('/u/:id', (req, res) => {
+  const longURL = urlDatabase[req.params.id]
+  res.redirect(longURL)
+})
+
 
 /*
 This post will generate a shortenURLKey and log it into the database. It will the redirect you to the URL
@@ -99,18 +106,24 @@ app.post('/urls', (req, res) => {
 This POST is initiated when the delete button in urls_index.ejs is clicked
 */
 app.post('/urls/:id/delete', (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect('/urls');
+  if (req.cookies['user_id']) {
+    delete urlDatabase[req.params.id];
+    res.redirect('/urls');
+  }
+  res.send('Only registered/logged-in users can delete URLs')
 });
 
 /*
 This POST will retrieve form input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'https://'. If not it will add it to the string using function AddHttp()
 */
 app.post('/urls/:id/edit', (req, res) => {
-  const id = req.params.id;
-  const longURL = req.body.longURL;
-  urlDatabase[id] = AddHttp(longURL);
-  res.redirect('/urls');
+  if (req.cookies['user_id']) {
+    const id = req.params.id;
+    const longURL = req.body.longURL;
+    urlDatabase[id] = AddHttp(longURL);
+    res.redirect('/urls');
+  }
+  res.send('Only registered/logged-in users can edit URLs')
 });
 
 /*
