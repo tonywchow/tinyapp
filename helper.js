@@ -9,7 +9,7 @@ const generateRandomString = () => {
   return uniqueString;
 };
 
-//
+//Loops through object to find user email
 
 const getUserByEmail = (userEmail, database) => {
   for (const item in database) {
@@ -20,4 +20,16 @@ const getUserByEmail = (userEmail, database) => {
   return undefined
 }
 
-module.exports = { generateRandomString, getUserByEmail }
+//Adds https:// to link if it is not already in the string
+
+const AddHttp = (link) => {
+  if (link.includes('http://')) {
+    return link;
+  }
+  if (link.includes('https://')) {
+    return link;
+  }
+  return link = 'https://' + link;
+}
+
+module.exports = { generateRandomString, getUserByEmail, AddHttp }

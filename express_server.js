@@ -1,8 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
 const cookieParser = require('cookie-parser');
-const { generateRandomString, getUserByEmail } = require('./helper');
-const { urlencoded } = require('express');
+const { generateRandomString, getUserByEmail, AddHttp } = require('./helper');
 const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
@@ -57,6 +56,7 @@ app.get('/urls', (req, res) => {
 
 //Creating new Short URL from Long URL
 app.get('/urls/new', (req, res) => {
+  
   const templateVars = {
     user: users[req.cookies['user_id']]
   };
@@ -69,7 +69,7 @@ This will determine if the short url ID exist, if it doesnt, it will redirect ba
 app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: AddHttp(urlDatabase[req.params.id]),
     user: users[req.cookies['user_id']]
   };
   let longURL = urlDatabase[req.params.id];
@@ -99,16 +99,17 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 /*
-This POST will retrieve form input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'http://'. If not it will add it to the string.
+This POST will retrieve form input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'https://'. If not it will add it to the string using function AddHttp()
 */
 app.post('/urls/:id/edit', (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
-  if (longURL.includes('http://')) {
-    urlDatabase[id] = longURL;
-  } else {
-    urlDatabase[id] = 'http://' + longURL;
-  }
+  urlDatabase[id] = AddHttp(longURL);
+  // if (longURL.includes('http://')) {
+  //   urlDatabase[id] = longURL;
+  // } else {
+  //   urlDatabase[id] = 'http://' + longURL;
+  // }
   res.redirect('/urls');
 });
 
@@ -129,21 +130,22 @@ app.get('/login', (req, res) => {
 
 app.post("/login", (req, res) => {
   if (req.body.email.length === 0) {
+    // res.redirect('/login')
     return res.status(400).send('Please enter login details');
   }
   if (req.body.password.length === 0) {
     return res.status(400).send('Invalid Password');
   }
-  const userUniqueID = getUserByEmail(req.body.email, users)
+  const userUniqueID = getUserByEmail(req.body.email, users);
   if (userUniqueID === undefined) {
-    return res.status(403).send('Email does not exist')
+    return res.status(403).send('Email does not exist');
   }
   if (userUniqueID) {
     if (userUniqueID.password !== req.body.password) {
-      return res.status(403).send('Incorrect password')
+      return res.status(403).send('Incorrect password');
     }
   }
-  console.log(users.userUniqueID)
+  console.log(users.userUniqueID);
   res.cookie("user_id", userUniqueID.id);
   res.redirect("/urls");
 });
@@ -157,7 +159,7 @@ app.post('/logout', (req, res) => {
 
 //Registering new email
 app.get('/register', (req, res) => {
-  const templateVars = { users };
+  const templateVars = { users, user: null };
   res.render('urls_register', templateVars);
 });
 
