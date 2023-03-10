@@ -56,17 +56,20 @@ app.get('/urls', (req, res) => {
 
 //Creating new Short URL from Long URL
 app.get('/urls/new', (req, res) => {
-  
-  const templateVars = {
-    user: users[req.cookies['user_id']]
-  };
-  res.render('urls_new',templateVars);
+  if (req.cookies['user_id']) {
+    const templateVars = {
+      user: users[req.cookies['user_id']]
+    };
+    res.render('urls_new',templateVars);
+  }
+  res.redirect('/login')
 });
 
 /*
 This will determine if the short url ID exist, if it doesnt, it will redirect back to the /url page. If it does exist, it will display the Long and short URL
 */
 app.get('/urls/:id', (req, res) => {
+  
   const templateVars = {
     id: req.params.id,
     longURL: AddHttp(urlDatabase[req.params.id]),
@@ -84,10 +87,12 @@ app.get('/urls/:id', (req, res) => {
 This post will generate a shortenURLKey and log it into the database. It will the redirect you to the URL
 */
 app.post('/urls', (req, res) => {
-  console.log(req.body);// Log the POST request body to the console
-  let shortenURLKey = generateRandomString();
-  urlDatabase[shortenURLKey] = req.body.longURL;
-  res.redirect(`/urls/${shortenURLKey}`);// Redirects you to the shortenURLKey
+  if (req.cookies['user_id']) {
+    let shortenURLKey = generateRandomString();
+    urlDatabase[shortenURLKey] = req.body.longURL;
+    res.redirect(`/urls/${shortenURLKey}`);// Redirects you to the shortenURLKey
+  }
+  res.send('Only registered/logged-in users can shorten URLs')
 });
 
 /*
@@ -105,11 +110,6 @@ app.post('/urls/:id/edit', (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
   urlDatabase[id] = AddHttp(longURL);
-  // if (longURL.includes('http://')) {
-  //   urlDatabase[id] = longURL;
-  // } else {
-  //   urlDatabase[id] = 'http://' + longURL;
-  // }
   res.redirect('/urls');
 });
 
@@ -123,9 +123,11 @@ app.post("/urls/:id", (req, res) => {
 
 //Login page
 app.get('/login', (req, res) => {
-  const templateVars = {user: null};
-  
-  res.render('urls_login', templateVars);
+  if (!req.cookies['user_id']) {
+    const templateVars = {user: null};
+    res.render('urls_login', templateVars);
+  }
+  res.redirect('/urls')
 });
 
 app.post("/login", (req, res) => {
@@ -159,8 +161,11 @@ app.post('/logout', (req, res) => {
 
 //Registering new email
 app.get('/register', (req, res) => {
-  const templateVars = { users, user: null };
-  res.render('urls_register', templateVars);
+  if (!req.cookies['user_id']) {
+    const templateVars = { users, user: null };
+    res.render('urls_register', templateVars);
+  }
+  res.redirect('/urls')
 });
 
 app.post('/register', (req, res) => {
