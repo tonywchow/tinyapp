@@ -9,9 +9,20 @@ app.use(morgan('dev'));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
@@ -54,7 +65,7 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
-//Creating new Short URL from Long URL
+//Create TinyURL: Creating new Short URL from Long URL
 app.get('/urls/new', (req, res) => {
   if (req.cookies['user_id']) {
     const templateVars = {
@@ -71,13 +82,12 @@ This will determine if the short url ID exist, if it doesnt, it will redirect ba
 app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
-    longURL: AddHttp(urlDatabase[req.params.id]),
+    longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
     user: users[req.cookies['user_id']]
   };
-  let longURL = urlDatabase[req.params.id];
+  let longURL = urlDatabase[req.params.id]['longURL'];
   if (longURL) {
     res.render('urls_show', templateVars);
-    res.redirect(longURL);
   }
   res.redirect('/urls');
 });
@@ -88,7 +98,7 @@ app.get('/u/:id', (req, res) => {
   if (!urlDatabase[req.params.id]) {
     res.send('Shortened URL does not exist')
   }
-  const longURL = urlDatabase[req.params.id]
+  const longURL = urlDatabase[req.params.id].longURL
   res.redirect(longURL)
 })
 
@@ -99,8 +109,12 @@ This post will generate a shortenURLKey and log it into the database. It will th
 app.post('/urls', (req, res) => {
   if (req.cookies['user_id']) {
     let shortenURLKey = generateRandomString();
-    urlDatabase[shortenURLKey] = req.body.longURL;
-    res.redirect(`/urls/${shortenURLKey}`);// Redirects you to the shortenURLKey
+    urlDatabase[shortenURLKey]= {
+      longURL: AddHttp(req.body.longURL),
+      userID: req.cookies['user_id']
+    }
+    console.log(urlDatabase)
+    res.redirect('/urls');// Redirects you back to the MyURLs
   }
   res.send('Only registered/logged-in users can shorten URLs')
 });
@@ -110,7 +124,8 @@ This POST is initiated when the delete button in urls_index.ejs is clicked
 */
 app.post('/urls/:id/delete', (req, res) => {
   if (req.cookies['user_id']) {
-    delete urlDatabase[req.params.id];
+    let userChosenShortenURL = req.params.id
+    delete urlDatabase[userChosenShortenURL];
     res.redirect('/urls');
   }
   res.send('Only registered/logged-in users can delete URLs')
@@ -121,9 +136,9 @@ This POST will retrieve form input from urls_show.ejs and edits the longURL. Thi
 */
 app.post('/urls/:id/edit', (req, res) => {
   if (req.cookies['user_id']) {
-    const id = req.params.id;
-    const longURL = req.body.longURL;
-    urlDatabase[id] = AddHttp(longURL);
+    const userChosenShortenURL = req.params.id;
+    const userInputLongURL = req.body.longURL;
+    urlDatabase[userChosenShortenURL]['longURL'] = AddHttp(userInputLongURL);
     res.redirect('/urls');
   }
   res.send('Only registered/logged-in users can edit URLs')
