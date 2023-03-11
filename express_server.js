@@ -86,6 +86,7 @@ app.get('/urls/:id', (req, res) => {
       longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
       user: users[req.cookies['user_id']]
     };
+    // The code below confirms the shorten URL belongs to the logged in user
     let userChosenShortenURL = req.params.id;
     let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
     if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
@@ -132,6 +133,7 @@ This POST is initiated when the delete button in urls_index.ejs is clicked
 */
 app.post('/urls/:id/delete', (req, res) => {
   if (req.cookies['user_id']) {
+    // The code below confirms the shorten URL belongs to the logged in user
     let userChosenShortenURL = req.params.id;
     let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
     if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
@@ -148,6 +150,7 @@ This POST will retrieve form input from urls_show.ejs and edits the longURL. Thi
 */
 app.post('/urls/:id/edit', (req, res) => {
   if (req.cookies['user_id']) {
+    // The code below confirms the shorten URL belongs to the logged in user
     let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
     let userChosenShortenURL = req.params.id;
     let userInputLongURL = req.body.longURL;
