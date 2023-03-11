@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 const { generateRandomString, getUserByEmail, AddHttp, urlsForUser } = require('./helper');
 const app = express();
 const PORT = 8080; //default port 8080
@@ -193,7 +194,10 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Email does not exist');
   }
   if (userUniqueID) {
-    if (userUniqueID.password !== req.body.password) {
+    // if (userUniqueID.password !== req.body.password) {
+    //   return res.status(403).send('Incorrect password');
+    // }
+    if (!bcrypt.compareSync(req.body.password, userUniqueID.password)) {
       return res.status(403).send('Incorrect password');
     }
   }
@@ -227,16 +231,19 @@ app.post('/register', (req, res) => {
     res.status(400).send('Invalid Password');
   }
   if (getUserByEmail(req.body.email, users) === undefined) {
+    const password = req.body.password
+    const salt = bcrypt.genSaltSync();
+    const hashed = bcrypt.hashSync(password, salt)
+
     users[newUserID] = {
       id: newUserID,
       email: req.body.email,
-      password: req.body.password,
+      password: hashed,
     };
     res.cookie('user_id', newUserID);
   } else {
     res.status(400).send('Email already exist');
   }
-  console.log(users);
   res.redirect('/urls');
 });
 
