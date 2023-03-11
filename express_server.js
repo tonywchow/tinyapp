@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
-const cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser'); //need to delete this later
+const cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs');
 const { generateRandomString, getUserByEmail, AddHttp, urlsForUser } = require('./helper');
 const app = express();
@@ -9,7 +10,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
-
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secretkey1', 'secretkey2'],
+}))
 // const urlDatabase = {
 //   "b2xVn2": "http://www.lighthouselabs.ca",
 //   "9sm5xK": "http://www.google.com"
@@ -55,11 +59,11 @@ app.get('/urls.json', (req, res) => {
 
 //Viewing all urls
 app.get('/urls', (req, res) => {
-  if (req.cookies['user_id']) {
+  if (req.session['user_id']) {
     const templateVars = {
-      // urls: urlsForUser(req.cookies['user_id'], urlDatabase),
+      // urls: urlsForUser(req.session['user_id'], urlDatabase),
       urls: urlDatabase,
-      user: users[req.cookies['user_id']]
+      user: users[req.session['user_id']]
     };
     res.render('urls_index', templateVars);
   }
@@ -68,9 +72,9 @@ app.get('/urls', (req, res) => {
 
 //Create TinyURL: Creating new Short URL from Long URL
 app.get('/urls/new', (req, res) => {
-  if (req.cookies['user_id']) {
+  if (req.session['user_id']) {
     const templateVars = {
-      user: users[req.cookies['user_id']]
+      user: users[req.session['user_id']]
     };
     res.render('urls_new',templateVars);
   }
@@ -81,18 +85,18 @@ app.get('/urls/new', (req, res) => {
 This will determine if the short url ID exist, if it doesnt it will redirect back to the /url page. If it does exist, it will display the Long and short URL
 */
 app.get('/urls/:id', (req, res) => {
-  if (req.cookies['user_id']) {
-    const templateVars = {
-      id: req.params.id,
-      longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
-      user: users[req.cookies['user_id']]
-    };
+  if (req.session['user_id']) {
     // The code below confirms the shorten URL belongs to the logged in user
     let userChosenShortenURL = req.params.id;
-    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
-    if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
-      res.send('You cannot access a URL that does not belong to you.');
+    if (req.session['user_id'] !== urlDatabase[userChosenShortenURL]['userID']) {
+      return res.send('You cannot access a URL that does not belong to you.');
     }
+    const templateVars = {
+      id: req.params.id,
+      // longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
+      longURL: urlsForUser(req.session['user_id'],urlDatabase)[req.params.id]['longURL'],
+      user: users[req.session['user_id']]
+    };
     let longURL = urlDatabase[req.params.id]['longURL'];
     if (longURL) {
       res.render('urls_show', templateVars);
@@ -117,11 +121,11 @@ app.get('/u/:id', (req, res) => {
 This post will generate a shortenURLKey and log it into the database. It will the redirect you to the URL
 */
 app.post('/urls', (req, res) => {
-  if (req.cookies['user_id']) {
+  if (req.session['user_id']) {
     let shortenURLKey = generateRandomString();
     urlDatabase[shortenURLKey] = {
       longURL: AddHttp(req.body.longURL),
-      userID: req.cookies['user_id']
+      userID: req.session['user_id']
     };
     console.log(urlDatabase);
     res.redirect('/urls');// Redirects you back to the MyURLs
@@ -133,12 +137,11 @@ app.post('/urls', (req, res) => {
 This POST is initiated when the delete button in urls_index.ejs is clicked
 */
 app.post('/urls/:id/delete', (req, res) => {
-  if (req.cookies['user_id']) {
+  if (req.session['user_id']) {
     // The code below confirms the shorten URL belongs to the logged in user
     let userChosenShortenURL = req.params.id;
-    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
-    if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
-      res.send('You cannot delete a URL that does not belong to you.');
+    if (req.session['user_id'] !== urlDatabase[userChosenShortenURL]['userID']) {
+      return res.send('You cannot delete a URL that does not belong to you.');
     }
     delete urlDatabase[userChosenShortenURL];
     res.redirect('/urls');
@@ -150,13 +153,12 @@ app.post('/urls/:id/delete', (req, res) => {
 This POST will retrieve form input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'https://'. If not it will add it to the string using function AddHttp()
 */
 app.post('/urls/:id/edit', (req, res) => {
-  if (req.cookies['user_id']) {
+  if (req.session['user_id']) {
     // The code below confirms the shorten URL belongs to the logged in user
-    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
     let userChosenShortenURL = req.params.id;
     let userInputLongURL = req.body.longURL;
-    if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
-      res.send('This URL does not belong to you.');
+    if (req.session['user_id'] !== urlDatabase[userChosenShortenURL]['userID']) {
+      return res.send('This URL does not belong to you.');
     }
     urlDatabase[userChosenShortenURL]['longURL'] = AddHttp(userInputLongURL);
     res.redirect('/urls');
@@ -174,7 +176,7 @@ app.post("/urls/:id", (req, res) => {
 
 //Login page
 app.get('/login', (req, res) => {
-  if (!req.cookies['user_id']) {
+  if (!req.session['user_id']) {
     const templateVars = {user: null};
     res.render('urls_login', templateVars);
   }
@@ -202,20 +204,22 @@ app.post("/login", (req, res) => {
     }
   }
   console.log(users.userUniqueID);
-  res.cookie("user_id", userUniqueID.id);
+  // res.cookie("user_id", userUniqueID.id);
+  req.session['user_id'] = userUniqueID.id
   res.redirect("/urls");
 });
 
 
 //Logging out
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  // res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/login');
 });
 
 //Registering new email
 app.get('/register', (req, res) => {
-  if (!req.cookies['user_id']) {
+  if (!req.session['user_id']) {
     const templateVars = { users, user: null };
     res.render('urls_register', templateVars);
   }
@@ -240,7 +244,8 @@ app.post('/register', (req, res) => {
       email: req.body.email,
       password: hashed,
     };
-    res.cookie('user_id', newUserID);
+    // res.cookie('user_id', newUserID);
+    req.session['user_id'] = newUserID;
   } else {
     res.status(400).send('Email already exist');
   }

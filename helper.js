@@ -37,17 +37,13 @@ const AddHttp = (link) => {
 const urlsForUser = (id, database) => {
   const userURLs = { };
   for (const key in database) {
-    if (database[key]['userID'] !== id) {
-      userURLs[key] = {
-        longURL: database[key]['longURL'],
-        userID: null
-      };
+    if (database[key]['userID'] === id) {
       userURLs[key] = {
         longURL: database[key]['longURL'],
         userID: id
       };
-    }
-  }
+    };
+  };
   return userURLs;
 };
 
