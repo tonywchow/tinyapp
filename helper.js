@@ -32,4 +32,19 @@ const AddHttp = (link) => {
   return link = 'https://' + link;
 }
 
-module.exports = { generateRandomString, getUserByEmail, AddHttp }
+// Compares user input ID to user ID in database. If there is a match, it will return an object with the user's longURL
+
+const urlsForUser = (id, database) => {
+  const userURLs = { }
+  for (const key in database) {
+    if(database[key]['userID'] === id) {
+      userURLs[key] = {
+        longURL: database[key]['longURL'],
+        userID: id
+      } 
+    }
+  }
+  return userURLs;
+};
+
+module.exports = { generateRandomString, getUserByEmail, AddHttp, urlsForUser }

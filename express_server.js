@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
 const cookieParser = require('cookie-parser');
-const { generateRandomString, getUserByEmail, AddHttp } = require('./helper');
+const { generateRandomString, getUserByEmail, AddHttp, urlsForUser } = require('./helper');
 const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
@@ -58,11 +58,16 @@ app.get('/urls.json', (req, res) => {
 
 //Viewing all urls
 app.get('/urls', (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies['user_id']]
-  };
-  res.render('urls_index', templateVars);
+  // if (req.cookies['user_id']) {
+    const templateVars = {
+      // urls: urlsForUser(req.cookies['user_id'], urlDatabase),
+      urls: urlDatabase,
+      user: users[req.cookies['user_id']]
+    };
+    res.render('urls_index', templateVars);
+  
+  // res.send('Please login to see your URLs')
+
 });
 
 //Create TinyURL: Creating new Short URL from Long URL
@@ -77,19 +82,22 @@ app.get('/urls/new', (req, res) => {
 });
 
 /*
-This will determine if the short url ID exist, if it doesnt, it will redirect back to the /url page. If it does exist, it will display the Long and short URL
+This will determine if the short url ID exist, if it doesnt it will redirect back to the /url page. If it does exist, it will display the Long and short URL
 */
 app.get('/urls/:id', (req, res) => {
-  const templateVars = {
-    id: req.params.id,
-    longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
-    user: users[req.cookies['user_id']]
-  };
-  let longURL = urlDatabase[req.params.id]['longURL'];
-  if (longURL) {
-    res.render('urls_show', templateVars);
+  if (req.cookies['user_id']) {
+    const templateVars = {
+      id: req.params.id,
+      longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
+      user: users[req.cookies['user_id']]
+    };
+    let longURL = urlDatabase[req.params.id]['longURL'];
+    if (longURL) {
+      res.render('urls_show', templateVars);
+    }
+    res.redirect('/urls');
   }
-  res.redirect('/urls');
+  // res.send('Please login to see your URLs')
 });
 
 //When the user clicks the short ID, they will be taken to the longURL
@@ -125,6 +133,10 @@ This POST is initiated when the delete button in urls_index.ejs is clicked
 app.post('/urls/:id/delete', (req, res) => {
   if (req.cookies['user_id']) {
     let userChosenShortenURL = req.params.id
+    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase)
+    if (userDatabase[userChosenShortenURL] !== urlDatabase[userChosenShortenURL]) {
+      res.send('You cannot delete a URL that does not belong to you.')
+    }
     delete urlDatabase[userChosenShortenURL];
     res.redirect('/urls');
   }
@@ -136,8 +148,12 @@ This POST will retrieve form input from urls_show.ejs and edits the longURL. Thi
 */
 app.post('/urls/:id/edit', (req, res) => {
   if (req.cookies['user_id']) {
-    const userChosenShortenURL = req.params.id;
-    const userInputLongURL = req.body.longURL;
+    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase)
+    let userChosenShortenURL = req.params.id;
+    let userInputLongURL = req.body.longURL;
+    if (userDatabase[userChosenShortenURL] !== urlDatabase[userChosenShortenURL]) {
+      res.send('This URL does not belong to you.')
+    }
     urlDatabase[userChosenShortenURL]['longURL'] = AddHttp(userInputLongURL);
     res.redirect('/urls');
   }
