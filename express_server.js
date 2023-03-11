@@ -58,16 +58,16 @@ app.get('/urls.json', (req, res) => {
 
 //Viewing all urls
 app.get('/urls', (req, res) => {
-  // if (req.cookies['user_id']) {
+  if (req.cookies['user_id']) {
     const templateVars = {
       // urls: urlsForUser(req.cookies['user_id'], urlDatabase),
       urls: urlDatabase,
       user: users[req.cookies['user_id']]
     };
     res.render('urls_index', templateVars);
-  
+  }
   // res.send('Please login to see your URLs')
-
+  res.send('Please log in to see your URLs')
 });
 
 //Create TinyURL: Creating new Short URL from Long URL
@@ -91,13 +91,19 @@ app.get('/urls/:id', (req, res) => {
       longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
       user: users[req.cookies['user_id']]
     };
+    let userChosenShortenURL = req.params.id
+    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase)
+    if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
+      res.send('You cannot access a URL that does not belong to you.')
+    }
     let longURL = urlDatabase[req.params.id]['longURL'];
     if (longURL) {
       res.render('urls_show', templateVars);
     }
     res.redirect('/urls');
   }
-  // res.send('Please login to see your URLs')
+  res.send('Please login to see your URLs')
+  
 });
 
 //When the user clicks the short ID, they will be taken to the longURL
@@ -134,7 +140,7 @@ app.post('/urls/:id/delete', (req, res) => {
   if (req.cookies['user_id']) {
     let userChosenShortenURL = req.params.id
     let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase)
-    if (userDatabase[userChosenShortenURL] !== urlDatabase[userChosenShortenURL]) {
+    if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
       res.send('You cannot delete a URL that does not belong to you.')
     }
     delete urlDatabase[userChosenShortenURL];
@@ -151,7 +157,7 @@ app.post('/urls/:id/edit', (req, res) => {
     let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase)
     let userChosenShortenURL = req.params.id;
     let userInputLongURL = req.body.longURL;
-    if (userDatabase[userChosenShortenURL] !== urlDatabase[userChosenShortenURL]) {
+    if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
       res.send('This URL does not belong to you.')
     }
     urlDatabase[userChosenShortenURL]['longURL'] = AddHttp(userInputLongURL);
