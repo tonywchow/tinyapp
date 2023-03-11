@@ -77,7 +77,9 @@ app.get('/urls/new', (req, res) => {
 });
 
 /*
-This will determine if the short url ID exist, if it doesnt it will redirect back to the /url page. If it does exist, it will display the long and short URL
+This will determine if the short url ID exist, 
+if it doesnt it will redirect back to the /url page. 
+If it does exist, it will display the long and short URL
 */
 app.get('/urls/:id', (req, res) => {
   if (req.session['user_id']) {
@@ -112,7 +114,9 @@ app.get('/u/:id', (req, res) => {
 
 
 /*
-This post will generate a shortenURLKey and log it into the database. It will the redirect you to the URL
+This post will generate a shortenURLKey 
+and log it into the database. 
+It will the redirect you to the URL
 */
 app.post('/urls', (req, res) => {
   if (req.session['user_id']) {
@@ -128,7 +132,8 @@ app.post('/urls', (req, res) => {
 });
 
 /*
-This POST is initiated when the delete button in urls_index.ejs is clicked
+This POST is initiated when the delete 
+button in urls_index.ejs is clicked
 */
 app.post('/urls/:id/delete', (req, res) => {
   if (req.session['user_id']) {
@@ -144,7 +149,10 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 /*
-This POST will retrieve form input from urls_show.ejs and edits the longURL. This will also determine whether the link contains 'https://'. If not it will add it to the string using function AddHttp()
+This POST will retrieve form input from 
+urls_show.ejs and edits the longURL. 
+This will also determine whether the link contains 'https://'.
+ If not it will add it to the string using function AddHttp()
 */
 app.post('/urls/:id/edit', (req, res) => {
   if (req.session['user_id']) {
@@ -161,7 +169,8 @@ app.post('/urls/:id/edit', (req, res) => {
 });
 
 /*
-This POST is initiated from urls_index.ejs when the edit button is clicked
+This POST is initiated from urls_index.ejs 
+when the edit button is clicked
 */
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
@@ -245,7 +254,9 @@ app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
 });
 
-// Used to bind and listen to the connection on the specified host and port
+/* Used to bind and listen to the connection 
+on the specified host and port
+*/
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
