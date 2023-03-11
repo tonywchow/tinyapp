@@ -3,7 +3,7 @@ const morgan = require('morgan');// Middleware logger
 const cookieParser = require('cookie-parser'); //need to delete this later
 const cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs');
-const { generateRandomString, getUserByEmail, AddHttp, urlsForUser } = require('./helper');
+const { generateRandomString, getUserByEmail, AddHttp, urlsForUser } = require('./helpers');
 const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
@@ -16,32 +16,32 @@ app.use(cookieSession({
 }))
 
 const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
+  // b6UTxQ: {
+  //   longURL: "https://www.tsn.ca",
+  //   userID: "aJ48lW",
+  // },
+  // i3BoGr: {
+  //   longURL: "https://www.google.ca",
+  //   userID: "aJ48lW",
+  // },
 };
 
 const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-  testid: {
-    id: "testid",
-    email: "hello@gmail.com",
-    password: "hello",
-  },
+  // userRandomID: {
+  //   id: "userRandomID",
+  //   email: "user@example.com",
+  //   password: "purple-monkey-dinosaur",
+  // },
+  // user2RandomID: {
+  //   id: "user2RandomID",
+  //   email: "user2@example.com",
+  //   password: "dishwasher-funk",
+  // },
+  // testid: {
+  //   id: "testid",
+  //   email: "hello@gmail.com",
+  //   password: "hello",
+  // },
 };
 
 //Homepage
@@ -187,6 +187,7 @@ app.post("/login", (req, res) => {
     return res.status(400).send('Invalid Password');
   }
   const userUniqueID = getUserByEmail(req.body.email, users);
+  console.log(userUniqueID, "this is a body coming from login")
   if (userUniqueID === undefined) {
     return res.status(403).send('Email does not exist');
   }
@@ -194,10 +195,10 @@ app.post("/login", (req, res) => {
     if (!bcrypt.compareSync(req.body.password, userUniqueID.password)) {
       return res.status(403).send('Incorrect password');
     }
+    console.log(users.userUniqueID);
+    req.session['user_id'] = userUniqueID.id
+    res.redirect("/urls");
   }
-  console.log(users.userUniqueID);
-  req.session['user_id'] = userUniqueID.id
-  res.redirect("/urls");
 });
 
 
@@ -207,7 +208,7 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-//Registering new email
+//Registering new email page
 app.get('/register', (req, res) => {
   if (!req.session['user_id']) {
     const templateVars = { users, user: null };
@@ -215,7 +216,7 @@ app.get('/register', (req, res) => {
   }
   res.redirect('/urls');
 });
-
+// Logic when user inputs registeration information
 app.post('/register', (req, res) => {
   let newUserID = generateRandomString();
   if (req.body.email.length === 0) {
