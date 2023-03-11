@@ -41,6 +41,10 @@
           <% } %>
         </tbody>
       </table>
+      <% if (error) {%>
+        <h3><%= error %></h3>
+        <a class="nav-item nav-link" href="/Login">Login</a>
+        <% } %>
     </main>
     <!-- Bootstrap JS -->
     <script

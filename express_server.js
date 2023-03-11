@@ -61,13 +61,15 @@ app.get('/urls.json', (req, res) => {
 app.get('/urls', (req, res) => {
   if (req.session['user_id']) {
     const templateVars = {
-      // urls: urlsForUser(req.session['user_id'], urlDatabase),
-      urls: urlDatabase,
-      user: users[req.session['user_id']]
+      urls: urlsForUser(req.session['user_id'], urlDatabase),
+      // urls: urlDatabase,
+      user: users[req.session['user_id']],
+      error: null
     };
-    res.render('urls_index', templateVars);
+    return res.render('urls_index', templateVars);
   }
-  res.send('Please log in to see your URLs');
+  const templateVars = {error:'Please log in to see your URLs', user: null, longURL: null, id:null, urls:null}
+  res.render('urls_index', templateVars);
 });
 
 //Create TinyURL: Creating new Short URL from Long URL
