@@ -1,6 +1,5 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
-const cookieParser = require('cookie-parser'); //need to delete this later
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const { generateRandomString, getUserByEmail, AddHttp, urlsForUser } = require('./helpers');
@@ -8,7 +7,6 @@ const app = express();
 const PORT = 8080; //default port 8080
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-app.use(cookieParser());
 app.set('view engine', 'ejs');
 app.use(cookieSession({
   name: 'session',
