@@ -14,10 +14,6 @@ app.use(cookieSession({
   name: 'session',
   keys: ['secretkey1', 'secretkey2'],
 }))
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 
 const urlDatabase = {
   b6UTxQ: {
@@ -62,7 +58,6 @@ app.get('/urls', (req, res) => {
   if (req.session['user_id']) {
     const templateVars = {
       urls: urlsForUser(req.session['user_id'], urlDatabase),
-      // urls: urlDatabase,
       user: users[req.session['user_id']],
       error: null
     };
@@ -95,7 +90,6 @@ app.get('/urls/:id', (req, res) => {
     }
     const templateVars = {
       id: req.params.id,
-      // longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
       longURL: urlsForUser(req.session['user_id'],urlDatabase)[req.params.id]['longURL'],
       user: users[req.session['user_id']]
     };
@@ -187,7 +181,6 @@ app.get('/login', (req, res) => {
 
 app.post("/login", (req, res) => {
   if (req.body.email.length === 0) {
-    // res.redirect('/login')
     return res.status(400).send('Please enter login details');
   }
   if (req.body.password.length === 0) {
@@ -198,15 +191,11 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Email does not exist');
   }
   if (userUniqueID) {
-    // if (userUniqueID.password !== req.body.password) {
-    //   return res.status(403).send('Incorrect password');
-    // }
     if (!bcrypt.compareSync(req.body.password, userUniqueID.password)) {
       return res.status(403).send('Incorrect password');
     }
   }
   console.log(users.userUniqueID);
-  // res.cookie("user_id", userUniqueID.id);
   req.session['user_id'] = userUniqueID.id
   res.redirect("/urls");
 });
@@ -214,7 +203,6 @@ app.post("/login", (req, res) => {
 
 //Logging out
 app.post('/logout', (req, res) => {
-  // res.clearCookie('user_id');
   req.session = null;
   res.redirect('/login');
 });
@@ -246,7 +234,6 @@ app.post('/register', (req, res) => {
       email: req.body.email,
       password: hashed,
     };
-    // res.cookie('user_id', newUserID);
     req.session['user_id'] = newUserID;
   } else {
     res.status(400).send('Email already exist');
