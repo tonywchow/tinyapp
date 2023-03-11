@@ -43,10 +43,6 @@ const users = {
   },
 };
 
-/*
-This function will generate a random string with a length of 6
-*/
- 
 //Homepage
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -66,8 +62,7 @@ app.get('/urls', (req, res) => {
     };
     res.render('urls_index', templateVars);
   }
-  // res.send('Please login to see your URLs')
-  res.send('Please log in to see your URLs')
+  res.send('Please log in to see your URLs');
 });
 
 //Create TinyURL: Creating new Short URL from Long URL
@@ -78,7 +73,7 @@ app.get('/urls/new', (req, res) => {
     };
     res.render('urls_new',templateVars);
   }
-  res.redirect('/login')
+  res.redirect('/login');
 });
 
 /*
@@ -91,10 +86,10 @@ app.get('/urls/:id', (req, res) => {
       longURL: AddHttp(urlDatabase[req.params.id]['longURL']),
       user: users[req.cookies['user_id']]
     };
-    let userChosenShortenURL = req.params.id
-    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase)
+    let userChosenShortenURL = req.params.id;
+    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
     if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
-      res.send('You cannot access a URL that does not belong to you.')
+      res.send('You cannot access a URL that does not belong to you.');
     }
     let longURL = urlDatabase[req.params.id]['longURL'];
     if (longURL) {
@@ -102,19 +97,18 @@ app.get('/urls/:id', (req, res) => {
     }
     res.redirect('/urls');
   }
-  res.send('Please login to see your URLs')
+  res.send('Please login to see your URLs');
   
 });
 
 //When the user clicks the short ID, they will be taken to the longURL
-
 app.get('/u/:id', (req, res) => {
   if (!urlDatabase[req.params.id]) {
-    res.send('Shortened URL does not exist')
+    res.send('Shortened URL does not exist');
   }
-  const longURL = urlDatabase[req.params.id].longURL
-  res.redirect(longURL)
-})
+  const longURL = urlDatabase[req.params.id].longURL;
+  res.redirect(longURL);
+});
 
 
 /*
@@ -123,14 +117,14 @@ This post will generate a shortenURLKey and log it into the database. It will th
 app.post('/urls', (req, res) => {
   if (req.cookies['user_id']) {
     let shortenURLKey = generateRandomString();
-    urlDatabase[shortenURLKey]= {
+    urlDatabase[shortenURLKey] = {
       longURL: AddHttp(req.body.longURL),
       userID: req.cookies['user_id']
-    }
-    console.log(urlDatabase)
+    };
+    console.log(urlDatabase);
     res.redirect('/urls');// Redirects you back to the MyURLs
   }
-  res.send('Only registered/logged-in users can shorten URLs')
+  res.send('Only registered/logged-in users can shorten URLs');
 });
 
 /*
@@ -138,15 +132,15 @@ This POST is initiated when the delete button in urls_index.ejs is clicked
 */
 app.post('/urls/:id/delete', (req, res) => {
   if (req.cookies['user_id']) {
-    let userChosenShortenURL = req.params.id
-    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase)
+    let userChosenShortenURL = req.params.id;
+    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
     if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
-      res.send('You cannot delete a URL that does not belong to you.')
+      res.send('You cannot delete a URL that does not belong to you.');
     }
     delete urlDatabase[userChosenShortenURL];
     res.redirect('/urls');
   }
-  res.send('Only registered/logged-in users can delete URLs')
+  res.send('Only registered/logged-in users can delete URLs');
 });
 
 /*
@@ -154,16 +148,16 @@ This POST will retrieve form input from urls_show.ejs and edits the longURL. Thi
 */
 app.post('/urls/:id/edit', (req, res) => {
   if (req.cookies['user_id']) {
-    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase)
+    let userDatabase = urlsForUser(req.cookies['user_id'], urlDatabase);
     let userChosenShortenURL = req.params.id;
     let userInputLongURL = req.body.longURL;
     if (userDatabase[userChosenShortenURL]['userID'] !== urlDatabase[userChosenShortenURL]['userID']) {
-      res.send('This URL does not belong to you.')
+      res.send('This URL does not belong to you.');
     }
     urlDatabase[userChosenShortenURL]['longURL'] = AddHttp(userInputLongURL);
     res.redirect('/urls');
   }
-  res.send('Only registered/logged-in users can edit URLs')
+  res.send('Only registered/logged-in users can edit URLs');
 });
 
 /*
@@ -180,7 +174,7 @@ app.get('/login', (req, res) => {
     const templateVars = {user: null};
     res.render('urls_login', templateVars);
   }
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 app.post("/login", (req, res) => {
@@ -218,7 +212,7 @@ app.get('/register', (req, res) => {
     const templateVars = { users, user: null };
     res.render('urls_register', templateVars);
   }
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 app.post('/register', (req, res) => {
