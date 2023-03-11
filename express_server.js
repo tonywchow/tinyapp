@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');// Middleware logger
 const cookieParser = require('cookie-parser'); //need to delete this later
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const { generateRandomString, getUserByEmail, AddHttp, urlsForUser } = require('./helpers');
 const app = express();
@@ -13,35 +13,35 @@ app.set('view engine', 'ejs');
 app.use(cookieSession({
   name: 'session',
   keys: ['secretkey1', 'secretkey2'],
-}))
+}));
 
 const urlDatabase = {
-  // b6UTxQ: {
-  //   longURL: "https://www.tsn.ca",
-  //   userID: "aJ48lW",
-  // },
-  // i3BoGr: {
-  //   longURL: "https://www.google.ca",
-  //   userID: "aJ48lW",
-  // },
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
-  // userRandomID: {
-  //   id: "userRandomID",
-  //   email: "user@example.com",
-  //   password: "purple-monkey-dinosaur",
-  // },
-  // user2RandomID: {
-  //   id: "user2RandomID",
-  //   email: "user2@example.com",
-  //   password: "dishwasher-funk",
-  // },
-  // testid: {
-  //   id: "testid",
-  //   email: "hello@gmail.com",
-  //   password: "hello",
-  // },
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+  testid: {
+    id: "testid",
+    email: "hello@gmail.com",
+    password: "hello",
+  },
 };
 
 //Homepage
@@ -63,7 +63,7 @@ app.get('/urls', (req, res) => {
     };
     return res.render('urls_index', templateVars);
   }
-  const templateVars = {error:'Please log in to see your URLs', user: null, longURL: null, id:null, urls:null}
+  const templateVars = {error:'Please log in to see your URLs', user: null, longURL: null, id:null, urls:null};
   res.render('urls_index', templateVars);
 });
 
@@ -79,7 +79,7 @@ app.get('/urls/new', (req, res) => {
 });
 
 /*
-This will determine if the short url ID exist, if it doesnt it will redirect back to the /url page. If it does exist, it will display the Long and short URL
+This will determine if the short url ID exist, if it doesnt it will redirect back to the /url page. If it does exist, it will display the long and short URL
 */
 app.get('/urls/:id', (req, res) => {
   if (req.session['user_id']) {
@@ -187,7 +187,7 @@ app.post("/login", (req, res) => {
     return res.status(400).send('Invalid Password');
   }
   const userUniqueID = getUserByEmail(req.body.email, users);
-  console.log(userUniqueID, "this is a body coming from login")
+  console.log(userUniqueID, "this is a body coming from login");
   if (userUniqueID === undefined) {
     return res.status(403).send('Email does not exist');
   }
@@ -196,7 +196,7 @@ app.post("/login", (req, res) => {
       return res.status(403).send('Incorrect password');
     }
     console.log(users.userUniqueID);
-    req.session['user_id'] = userUniqueID.id
+    req.session['user_id'] = userUniqueID.id;
     res.redirect("/urls");
   }
 });
@@ -208,7 +208,7 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-//Registering new email page
+//Registering new account page
 app.get('/register', (req, res) => {
   if (!req.session['user_id']) {
     const templateVars = { users, user: null };
@@ -226,9 +226,9 @@ app.post('/register', (req, res) => {
     res.status(400).send('Invalid Password');
   }
   if (getUserByEmail(req.body.email, users) === undefined) {
-    const password = req.body.password
+    const password = req.body.password;
     const salt = bcrypt.genSaltSync();
-    const hashed = bcrypt.hashSync(password, salt)
+    const hashed = bcrypt.hashSync(password, salt);
 
     users[newUserID] = {
       id: newUserID,
@@ -242,12 +242,12 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-
+// Hello page
 app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
 });
 
-//Used to bind and listen to the connection on the specified host and port
+// Used to bind and listen to the connection on the specified host and port
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });

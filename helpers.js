@@ -42,8 +42,8 @@ const urlsForUser = (id, database) => {
         longURL: database[key]['longURL'],
         userID: id
       };
-    };
-  };
+    }
+  }
   return userURLs;
 };
 
