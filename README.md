@@ -20,17 +20,19 @@ This project uses the following dependencies:
 # Final Product
 Here is what the final web application looks like:
 
-!["Player Initials and Message"](./assets/images/start.png)
-!["Gameplay"](./assets/images/gameplay.png)
-
+## Login Page
 !["Login Page"](./assets/images/Login.png)
 
+## Register Page
 !["Register Page"](./assets/images/Register.png)
 
+## URL List Page
 !["URL List Page"](./assets/images/List.png)
 
+## Create New URL Page
 !["Create New URL Page"](./assets/images/NewURL.png)
 
+## Edit Page
 !["Edit Page"](./assets/images/Edit.png)
 
 Getting Started:
