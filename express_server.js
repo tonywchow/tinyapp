@@ -62,7 +62,7 @@ app.get('/urls', (req, res) => {
     return res.render('urls_index', templateVars);
   }
   const templateVars = {error:'Please log in to see your URLs', user: null, longURL: null, id:null, urls:null};
-  res.render('urls_index', templateVars);
+  return res.render('urls_index', templateVars);
 });
 
 //Create TinyURL: Creating new Short URL from Long URL
@@ -71,14 +71,14 @@ app.get('/urls/new', (req, res) => {
     const templateVars = {
       user: users[req.session['user_id']]
     };
-    res.render('urls_new',templateVars);
+    return res.render('urls_new',templateVars);
   }
-  res.redirect('/login');
+  return res.redirect('/login');
 });
 
 /*
-This will determine if the short url ID exist, 
-if it doesnt it will redirect back to the /url page. 
+This will determine if the short url ID exist,
+if it doesnt it will redirect back to the /url page.
 If it does exist, it will display the long and short URL
 */
 app.get('/urls/:id', (req, res) => {
@@ -95,27 +95,27 @@ app.get('/urls/:id', (req, res) => {
     };
     let longURL = urlDatabase[req.params.id]['longURL'];
     if (longURL) {
-      res.render('urls_show', templateVars);
+      return res.render('urls_show', templateVars);
     }
-    res.redirect('/urls');
+    return res.redirect('/urls');
   }
-  res.send('Please login to see your URLs');
+  return res.send('Please login to see your URLs');
   
 });
 
 //When the user clicks the short ID, they will be taken to the longURL
 app.get('/u/:id', (req, res) => {
   if (!urlDatabase[req.params.id]) {
-    res.send('Shortened URL does not exist');
+    return res.send('Shortened URL does not exist');
   }
   const longURL = urlDatabase[req.params.id].longURL;
-  res.redirect(longURL);
+  return res.redirect(longURL);
 });
 
 
 /*
-This post will generate a shortenURLKey 
-and log it into the database. 
+This post will generate a shortenURLKey
+and log it into the database.
 It will the redirect you to the URL
 */
 app.post('/urls', (req, res) => {
@@ -125,13 +125,13 @@ app.post('/urls', (req, res) => {
       longURL: AddHttp(req.body.longURL),
       userID: req.session['user_id']
     };
-    res.redirect('/urls');// Redirects you back to the MyURLs
+    return res.redirect('/urls');// Redirects you back to the MyURLs
   }
-  res.send('Only registered/logged-in users can shorten URLs');
+  return res.send('Only registered/logged-in users can shorten URLs');
 });
 
 /*
-This POST is initiated when the delete 
+This POST is initiated when the delete
 button in urls_index.ejs is clicked
 */
 app.post('/urls/:id/delete', (req, res) => {
@@ -142,14 +142,14 @@ app.post('/urls/:id/delete', (req, res) => {
       return res.send('You cannot delete a URL that does not belong to you.');
     }
     delete urlDatabase[userChosenShortenURL];
-    res.redirect('/urls');
+    return res.redirect('/urls');
   }
-  res.send('Only registered/logged-in users can delete URLs');
+  return res.send('Only registered/logged-in users can delete URLs');
 });
 
 /*
-This POST will retrieve form input from 
-urls_show.ejs and edits the longURL. 
+This POST will retrieve form input from
+urls_show.ejs and edits the longURL.
 This will also determine whether the link contains 'https://'.
  If not it will add it to the string using function AddHttp()
 */
@@ -162,27 +162,27 @@ app.post('/urls/:id/edit', (req, res) => {
       return res.send('This URL does not belong to you.');
     }
     urlDatabase[userChosenShortenURL]['longURL'] = AddHttp(userInputLongURL);
-    res.redirect('/urls');
+    return res.redirect('/urls');
   }
-  res.send('Only registered/logged-in users can edit URLs');
+  return res.send('Only registered/logged-in users can edit URLs');
 });
 
 /*
-This POST is initiated from urls_index.ejs 
+This POST is initiated from urls_index.ejs
 when the edit button is clicked
 */
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  res.redirect(`/urls/${id}`);
+  return res.redirect(`/urls/${id}`);
 });
 
 //Login page
 app.get('/login', (req, res) => {
   if (!req.session['user_id']) {
     const templateVars = {user: null};
-    res.render('urls_login', templateVars);
+    return res.render('urls_login', templateVars);
   }
-  res.redirect('/urls');
+  return res.redirect('/urls');
 });
 
 app.post("/login", (req, res) => {
@@ -201,7 +201,7 @@ app.post("/login", (req, res) => {
       return res.status(403).send('Incorrect password');
     }
     req.session['user_id'] = userUniqueID.id;
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
 });
 
@@ -209,25 +209,25 @@ app.post("/login", (req, res) => {
 //Logging out
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/login');
+  return res.redirect('/login');
 });
 
 //Registering new account page
 app.get('/register', (req, res) => {
   if (!req.session['user_id']) {
     const templateVars = { users, user: null };
-    res.render('urls_register', templateVars);
+    return res.render('urls_register', templateVars);
   }
-  res.redirect('/urls');
+  return res.redirect('/urls');
 });
 // Logic when user inputs registeration information
 app.post('/register', (req, res) => {
   let newUserID = generateRandomString();
   if (req.body.email.length === 0) {
-    res.status(400).send('Please enter login details');
+    return res.status(400).send('Please enter login details');
   }
   if (req.body.password.length === 0) {
-    res.status(400).send('Invalid Password');
+    return res.status(400).send('Invalid Password');
   }
   if (getUserByEmail(req.body.email, users) === undefined) {
     const password = req.body.password;
@@ -241,9 +241,9 @@ app.post('/register', (req, res) => {
     };
     req.session['user_id'] = newUserID;
   } else {
-    res.status(400).send('Email already exist');
+    return res.status(400).send('Email already exist');
   }
-  res.redirect('/urls');
+  return res.redirect('/urls');
 });
 
 // Hello page
@@ -251,7 +251,7 @@ app.get('/hello', (req, res) => {
   res.send('<html><body> Hello <b>World</b></body></html>\n');
 });
 
-/* Used to bind and listen to the connection 
+/* Used to bind and listen to the connection
 on the specified host and port
 */
 app.listen(PORT, () => {
