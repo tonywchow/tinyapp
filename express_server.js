@@ -125,7 +125,6 @@ app.post('/urls', (req, res) => {
       longURL: AddHttp(req.body.longURL),
       userID: req.session['user_id']
     };
-    console.log(urlDatabase);
     res.redirect('/urls');// Redirects you back to the MyURLs
   }
   res.send('Only registered/logged-in users can shorten URLs');
@@ -194,7 +193,6 @@ app.post("/login", (req, res) => {
     return res.status(400).send('Invalid Password');
   }
   const userUniqueID = getUserByEmail(req.body.email, users);
-  console.log(userUniqueID, "this is a body coming from login");
   if (userUniqueID === undefined) {
     return res.status(403).send('Email does not exist');
   }
@@ -202,7 +200,6 @@ app.post("/login", (req, res) => {
     if (!bcrypt.compareSync(req.body.password, userUniqueID.password)) {
       return res.status(403).send('Incorrect password');
     }
-    console.log(users.userUniqueID);
     req.session['user_id'] = userUniqueID.id;
     res.redirect("/urls");
   }
